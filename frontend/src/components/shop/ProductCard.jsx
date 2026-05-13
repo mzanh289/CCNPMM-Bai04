@@ -9,6 +9,8 @@ const formatCurrency = (value) => {
 
 const ProductCard = ({ product }) => {
   const primaryImage = product?.imageUrls?.[0];
+  console.log('PRIMARY IMAGE:', primaryImage);
+  console.log('PRODUCT:', product);
   const price = product?.price ?? 0;
   const discountPrice = product?.discountPrice ?? product?.discount?.value ? product?.discountPrice : null;
 
@@ -19,7 +21,11 @@ const ProductCard = ({ product }) => {
     >
       <div className="relative h-48 w-full overflow-hidden bg-slate-100">
         {primaryImage ? (
-          <img src={primaryImage} alt={product?.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+          <img
+            src={primaryImage}
+            alt={product?.name}
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-slate-400">No image</div>
         )}

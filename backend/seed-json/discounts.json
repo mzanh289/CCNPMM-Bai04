@@ -14,8 +14,8 @@
   },
   {
     "_id": { "$oid": "665f40000000000000000002" },
-    "title": "Home Office Refresh",
-    "description": "Limited-time desk lamp promo.",
+    "title": "Smart Lighting Promo",
+    "description": "Limited-time discount on the smart desk lamp.",
     "type": "AMOUNT",
     "value": 20,
     "startsAt": { "$date": "2026-05-13T00:00:00.000Z" },
