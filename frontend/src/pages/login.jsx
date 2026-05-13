@@ -33,7 +33,8 @@ const LoginPage = () => {
                         name: res?.user?.name ?? ""
                     }
                 })
-                navigate(res?.url || (res?.user?.role === 'ADMIN' ? '/admin/profile' : '/user/profile'), { replace: true });
+                const nextUrl = res?.user?.role === 'ADMIN' ? '/admin/profile' : '/';
+                navigate(res?.url || nextUrl, { replace: true });
 
             } else {
                 notification.error({

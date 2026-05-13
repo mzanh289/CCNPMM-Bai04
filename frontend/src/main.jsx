@@ -13,6 +13,7 @@ import UserPage from './pages/user.jsx';
 import AdminPage from './pages/admin.jsx';
 import HomePage from './pages/home.jsx';
 import LoginPage from './pages/login.jsx';
+import ProductDetailPage from './pages/product-detail.jsx';
 import { AuthWrapper } from './components/context/auth.context.jsx';
 import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
 
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
       {
         path: "admin/profile",
         element: <ProtectedRoute allowedRoles={["ADMIN"]}><AdminPage /></ProtectedRoute>
+      },
+      {
+        path: "products/:id",
+        element: <ProtectedRoute allowedRoles={["USER", "ADMIN"]}><ProductDetailPage /></ProtectedRoute>
       },
     ]
   },

@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Header from "./components/layout/header";
+import { useLocation } from "react-router-dom";
 import { getProfileApi } from "./util/api";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "./components/context/auth.context";
@@ -22,6 +23,7 @@ const decodeJwtPayload = (token) => {
 
 function App() {
   const { setAuth, logout, appLoading, setAppLoading } = useContext(AuthContext);
+  const location = useLocation();
 
   useEffect(() => {
     const fetchAccount = async () => {
@@ -83,7 +85,7 @@ function App() {
         </div>
         :
         <>
-          <Header />
+          {location.pathname === "/" || location.pathname.startsWith("/products") ? null : <Header />}
           <Outlet />
         </>
       }

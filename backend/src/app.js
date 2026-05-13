@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const authRoutes = require('./routes/authRoutes');
+const catalogRoutes = require('./routes/catalogRoutes');
 
 const app = express();
 
@@ -13,5 +14,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/catalog', catalogRoutes);
 
 module.exports = app;
