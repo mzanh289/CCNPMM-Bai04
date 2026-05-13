@@ -1,6 +1,5 @@
 const Product = require('../models/Product');
 const Category = require('../models/Category');
-const ProductImage = require('../models/ProductImage');
 const Discount = require('../models/Discount');
 
 const normalizeNumber = (value, fallback) => {
@@ -119,25 +118,8 @@ const getProducts = async (query) => {
       .limit(limit),
     Product.countDocuments(combinedFilter)
   ]);
-
-  const productIds = items.map((item) => item._id);
-  const images = await ProductImage.find({ product: { $in: productIds } }).sort({ position: 1 });
-  const imagesByProduct = images.reduce((acc, img) => {
-    const key = img.product.toString();
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(img);
-    return acc;
-  }, {});
-
-  const mappedItems = items.map((item) => ({
-    ...item.toJSON(),
-    images: imagesByProduct[item._id.toString()] ?? []
-  }));
-
   return {
-    items: mappedItems,
+    items: items.map((item) => item.toJSON()),
     pagination: {
       page,
       limit,
@@ -152,22 +134,7 @@ const getLatestProducts = async (limit = 8) => {
     .populate('category')
     .sort({ createdAt: -1 })
     .limit(limit);
-
-  const productIds = items.map((item) => item._id);
-  const images = await ProductImage.find({ product: { $in: productIds } }).sort({ position: 1 });
-  const imagesByProduct = images.reduce((acc, img) => {
-    const key = img.product.toString();
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(img);
-    return acc;
-  }, {});
-
-  return items.map((item) => ({
-    ...item.toJSON(),
-    images: imagesByProduct[item._id.toString()] ?? []
-  }));
+  return items.map((item) => item.toJSON());
 };
 
 const getBestSellingProducts = async (limit = 8) => {
@@ -175,22 +142,7 @@ const getBestSellingProducts = async (limit = 8) => {
     .populate('category')
     .sort({ soldQuantity: -1, createdAt: -1 })
     .limit(limit);
-
-  const productIds = items.map((item) => item._id);
-  const images = await ProductImage.find({ product: { $in: productIds } }).sort({ position: 1 });
-  const imagesByProduct = images.reduce((acc, img) => {
-    const key = img.product.toString();
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(img);
-    return acc;
-  }, {});
-
-  return items.map((item) => ({
-    ...item.toJSON(),
-    images: imagesByProduct[item._id.toString()] ?? []
-  }));
+  return items.map((item) => item.toJSON());
 };
 
 const getPromotionProducts = async (limit = 8) => {
@@ -214,21 +166,7 @@ const getPromotionProducts = async (limit = 8) => {
     }))
     .filter((item) => item.id);
 
-  const productIds = products.map((item) => item.id);
-  const images = await ProductImage.find({ product: { $in: productIds } }).sort({ position: 1 });
-  const imagesByProduct = images.reduce((acc, img) => {
-    const key = img.product.toString();
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(img);
-    return acc;
-  }, {});
-
-  return products.map((item) => ({
-    ...item,
-    images: imagesByProduct[item.id] ?? []
-  }));
+  return products;
 };
 
 const getProductById = async (productId) => {
@@ -237,7 +175,6 @@ const getProductById = async (productId) => {
     return null;
   }
 
-  const images = await ProductImage.find({ product: productId }).sort({ position: 1 });
   const now = new Date();
   const discount = await Discount.findOne({
     product: productId,
@@ -248,7 +185,6 @@ const getProductById = async (productId) => {
 
   return {
     ...product.toJSON(),
-    images,
     discount: discount ? discount.toJSON() : null
   };
 };
@@ -263,21 +199,7 @@ const getRelatedProducts = async (productId, categoryId, limit = 6) => {
     .sort({ soldQuantity: -1, createdAt: -1 })
     .limit(limit);
 
-  const productIds = items.map((item) => item._id);
-  const images = await ProductImage.find({ product: { $in: productIds } }).sort({ position: 1 });
-  const imagesByProduct = images.reduce((acc, img) => {
-    const key = img.product.toString();
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(img);
-    return acc;
-  }, {});
-
-  return items.map((item) => ({
-    ...item.toJSON(),
-    images: imagesByProduct[item._id.toString()] ?? []
-  }));
+  return items.map((item) => item.toJSON());
 };
 
 module.exports = {

@@ -8,6 +8,7 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, required: true, min: 0 },
     discountPrice: { type: Number, min: 0, default: null },
     sku: { type: String, default: '' },
+    imageUrls: [{ type: String, trim: true }],
     stockQuantity: { type: Number, default: 0, min: 0 },
     soldQuantity: { type: Number, default: 0, min: 0 },
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },

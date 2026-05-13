@@ -76,7 +76,7 @@ const ProductDetailPage = () => {
     );
   }
 
-  const images = product.images ?? [];
+  const images = product.imageUrls ?? [];
   const hasDiscount = Boolean(product.discountPrice);
   const price = product.discountPrice || product.price;
 
@@ -104,10 +104,10 @@ const ProductDetailPage = () => {
                     className="rounded-3xl"
                   >
                     {images.map((image) => (
-                      <SwiperSlide key={image.id}>
+                      <SwiperSlide key={image}>
                         <img
-                          src={image.url}
-                          alt={image.altText || product.name}
+                          src={image}
+                          alt={product.name}
                           className="h-96 w-full rounded-3xl object-cover"
                         />
                       </SwiperSlide>
@@ -120,10 +120,10 @@ const ProductDetailPage = () => {
                     slidesPerView={4}
                   >
                     {images.map((image) => (
-                      <SwiperSlide key={`thumb-${image.id}`}>
+                      <SwiperSlide key={`thumb-${image}`}>
                         <img
-                          src={image.url}
-                          alt={image.altText || product.name}
+                          src={image}
+                          alt={product.name}
                           className="h-20 w-full rounded-2xl object-cover"
                         />
                       </SwiperSlide>

@@ -8,7 +8,7 @@ const formatCurrency = (value) => {
 };
 
 const ProductCard = ({ product }) => {
-  const primaryImage = product?.images?.[0]?.url;
+  const primaryImage = product?.imageUrls?.[0];
   const price = product?.price ?? 0;
   const discountPrice = product?.discountPrice ?? product?.discount?.value ? product?.discountPrice : null;
 
