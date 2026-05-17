@@ -1,4 +1,5 @@
 const catalogService = require('../services/catalogService');
+const productImageService = require('../services/productImageService');
 
 const logControllerError = (operation, error) => {
   console.error(`[catalogController:${operation}]`, {
@@ -94,11 +95,33 @@ const getProductDetail = async (req, res) => {
   }
 };
 
+const uploadProductImages = async (req, res) => {
+  try {
+    const product = await productImageService.replaceProductImages({
+      productId: req.params.id,
+      files: req.files ?? [],
+      req
+    });
+
+    return res.status(200).json({
+      message: 'Product images updated successfully.',
+      product
+    });
+  } catch (error) {
+    logControllerError('uploadProductImages', error);
+    return res.status(error.statusCode || 500).json({
+      message: error.message || 'Failed to update product images.',
+      operation: 'uploadProductImages'
+    });
+  }
+};
+
 module.exports = {
   getCategories,
   getProducts,
   getLatestProducts,
   getBestSellingProducts,
   getPromotionProducts,
-  getProductDetail
+  getProductDetail,
+  uploadProductImages
 };

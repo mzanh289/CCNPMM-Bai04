@@ -20,8 +20,8 @@ const ShopHeader = ({ searchValue = '', onSearchChange }) => {
             <Link to="/" className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white font-bold">Q</div>
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-500">QuickCart</p>
-                <h1 className="font-display text-xl text-slate-900">Commerce Studio</h1>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Quick & Legit</p>
+                <h1 className="font-display text-xl text-slate-900">DANH'S STUDIO</h1>
               </div>
             </Link>
             <button className="flex items-center gap-2 rounded-full bg-slate-900 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white lg:hidden">

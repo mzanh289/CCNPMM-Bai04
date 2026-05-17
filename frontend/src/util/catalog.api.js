@@ -2,6 +2,22 @@ import axios from './axios.customize';
 
 const API_PREFIX = '/api/catalog';
 
+const normalizeDetailResponse = (response) => {
+  if (!response || typeof response !== 'object') {
+    return { product: null, related: [] };
+  }
+
+  const payload = response.data && typeof response.data === 'object' && !Array.isArray(response.data)
+    ? response.data
+    : response;
+
+  return {
+    product: payload?.product ?? null,
+    related: Array.isArray(payload?.related) ? payload.related : [],
+    status: payload?.status ?? response.status
+  };
+};
+
 export const fetchCategories = () => axios.get(`${API_PREFIX}/categories`);
 
 export const fetchProducts = (params) => axios.get(`${API_PREFIX}/products`, { params });
@@ -15,4 +31,7 @@ export const fetchBestSellingProducts = (limit = 8) =>
 export const fetchPromotionProducts = (limit = 8) =>
   axios.get(`${API_PREFIX}/products/promotions`, { params: { limit } });
 
-export const fetchProductDetail = (id) => axios.get(`${API_PREFIX}/products/${id}`);
+export const fetchProductDetail = async (id) => {
+  const response = await axios.get(`${API_PREFIX}/products/${id}`);
+  return normalizeDetailResponse(response);
+};

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Thumbs } from 'swiper/modules';
+import { Navigation, Pagination, Thumbs } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 import 'swiper/css/thumbs';
 import ShopHeader from '../components/shop/ShopHeader';
 import SectionHeader from '../components/shop/SectionHeader';
@@ -30,12 +31,14 @@ const ProductDetailPage = () => {
   useEffect(() => {
     const loadProduct = async () => {
       setLoading(true);
+      setThumbsSwiper(null);
       try {
         const res = await fetchProductDetail(id);
-        setProduct(res?.product ?? null);
-        setRelated(res?.related ?? []);
+        setProduct(res?.product && typeof res.product === 'object' ? res.product : null);
+        setRelated(Array.isArray(res?.related) ? res.related : []);
         setError('');
-      } catch {
+      } catch (error) {
+        console.error('[ProductDetailPage] Failed to load product detail:', error);
         setError('Unable to load product.');
       } finally {
         setLoading(false);
@@ -76,97 +79,125 @@ const ProductDetailPage = () => {
     );
   }
 
-  const images = product.imageUrls ?? [];
+  const productId = product?.id ?? product?._id ?? id;
+  const images = Array.isArray(product?.imageUrls)
+    ? product.imageUrls.filter(Boolean)
+    : [];
+  const activeThumbsSwiper = thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null;
   const hasDiscount = Boolean(product.discountPrice);
   const price = product.discountPrice || product.price;
 
   return (
     <div className="flex min-h-screen flex-col">
       <ShopHeader />
-      <main className="flex flex-col gap-14 py-10">
+      <main className="flex flex-col gap-12 py-10">
         <section className="section-shell space-y-8">
           <nav className="text-sm text-slate-500">
             <Link to="/" className="hover:text-slate-900">Home</Link>
             <span className="mx-2">/</span>
-            <span>{product.category?.name || 'Category'}</span>
+            <span>{product?.category?.name || 'Category'}</span>
             <span className="mx-2">/</span>
-            <span className="text-slate-900">{product.name}</span>
+            <span className="text-slate-900">{product?.name || 'Product detail'}</span>
           </nav>
 
-          <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="space-y-6">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:items-start">
+            <div className="min-w-0 space-y-6">
               {images.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-4 min-w-0">
                   <Swiper
-                    modules={[Navigation, Thumbs]}
+                    key={productId}
+                    modules={[Navigation, Pagination, Thumbs]}
                     navigation
-                    thumbs={{ swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null }}
-                    className="rounded-3xl"
+                    pagination={{ clickable: true }}
+                    loop={images.length > 1}
+                    watchOverflow
+                    thumbs={{ swiper: images.length > 1 ? activeThumbsSwiper : null }}
+                    className="product-detail-swiper aspect-square w-full overflow-hidden rounded-3xl bg-slate-100"
                   >
                     {images.map((image) => (
-                      <SwiperSlide key={image}>
+                      <SwiperSlide key={image} className="!h-full w-full">
                         <img
                           src={image}
-                          alt={product.name}
-                          className="h-96 w-full rounded-3xl object-cover"
+                          alt={product?.name || 'Product image'}
+                          className="block h-full w-full object-cover"
+                          loading="lazy"
+                          onError={(event) => {
+                            event.currentTarget.src = 'https://placehold.co/1200x1200?text=Image+Unavailable';
+                          }}
                         />
                       </SwiperSlide>
                     ))}
                   </Swiper>
                   <Swiper
+                    key={`${productId}-thumbs`}
                     onSwiper={setThumbsSwiper}
                     modules={[Thumbs]}
+                    watchSlidesProgress
                     spaceBetween={12}
-                    slidesPerView={4}
+                    slidesPerView={3}
+                    className="product-detail-thumbs w-full"
+                    breakpoints={{
+                      640: { slidesPerView: 4 },
+                      1024: { slidesPerView: 5 }
+                    }}
                   >
                     {images.map((image) => (
-                      <SwiperSlide key={`thumb-${image}`}>
-                        <img
-                          src={image}
-                          alt={product.name}
-                          className="h-20 w-full rounded-2xl object-cover"
-                        />
+                      <SwiperSlide key={`thumb-${image}`} className="!h-auto">
+                        <div className="aspect-square overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200 transition hover:ring-slate-300">
+                          <img
+                            src={image}
+                            alt={product?.name || 'Product thumbnail'}
+                            className="block h-full w-full object-cover"
+                            loading="lazy"
+                            onError={(event) => {
+                              event.currentTarget.src = 'https://placehold.co/1200x1200?text=Image+Unavailable';
+                            }}
+                          />
+                        </div>
                       </SwiperSlide>
                     ))}
                   </Swiper>
                 </div>
               ) : (
-                <div className="flex h-96 items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400">
-                  No images available
+                <div className="flex aspect-square w-full items-center justify-center rounded-3xl border border-slate-200 bg-slate-50 text-slate-400">
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-slate-500">No images available</p>
+                    <p className="mt-1 text-xs text-slate-400">Product images will appear here once uploaded.</p>
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className="space-y-6">
+            <div className="min-w-0 space-y-6">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">{product.category?.name}</p>
-                <h1 className="mt-3 font-display text-3xl text-slate-900">{product.name}</h1>
-                <p className="mt-3 text-sm text-slate-500">{product.description}</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">{product?.category?.name || 'Category'}</p>
+                <h1 className="mt-3 font-display text-3xl text-slate-900">{product?.name || 'Product detail'}</h1>
+                <p className="mt-3 text-sm text-slate-500">{product?.description || 'No description available.'}</p>
               </div>
 
               <div className="rounded-3xl border border-slate-200 bg-white p-6">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="text-2xl font-semibold text-slate-900">{formatCurrency(price)}</span>
                   {hasDiscount && (
-                    <span className="text-sm text-slate-400 line-through">{formatCurrency(product.price)}</span>
+                    <span className="text-sm text-slate-400 line-through">{formatCurrency(product?.price ?? 0)}</span>
                   )}
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-slate-600">
                   <div>
                     <p className="text-xs uppercase text-slate-400">SKU</p>
-                    <p className="font-semibold text-slate-900">{product.sku || 'N/A'}</p>
+                    <p className="font-semibold text-slate-900">{product?.sku || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-xs uppercase text-slate-400">Stock</p>
-                    <p className="font-semibold text-slate-900">{product.stockQuantity}</p>
+                    <p className="font-semibold text-slate-900">{product?.stockQuantity ?? 0}</p>
                   </div>
                   <div>
                     <p className="text-xs uppercase text-slate-400">Sold</p>
-                    <p className="font-semibold text-slate-900">{product.soldQuantity}</p>
+                    <p className="font-semibold text-slate-900">{product?.soldQuantity ?? 0}</p>
                   </div>
                   <div>
                     <p className="text-xs uppercase text-slate-400">Category</p>
-                    <p className="font-semibold text-slate-900">{product.category?.name}</p>
+                    <p className="font-semibold text-slate-900">{product?.category?.name || 'N/A'}</p>
                   </div>
                 </div>
               </div>

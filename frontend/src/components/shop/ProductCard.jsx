@@ -1,4 +1,8 @@
 import { Link } from 'react-router-dom';
+import { Autoplay, Pagination } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/pagination';
 
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('en-US', {
@@ -8,9 +12,8 @@ const formatCurrency = (value) => {
 };
 
 const ProductCard = ({ product }) => {
-  const primaryImage = product?.imageUrls?.[0];
-  console.log('PRIMARY IMAGE:', primaryImage);
-  console.log('PRODUCT:', product);
+  const images = Array.isArray(product?.imageUrls) ? product.imageUrls.filter(Boolean) : [];
+  const hasMultipleImages = images.length > 1;
   const price = product?.price ?? 0;
   const discountPrice = product?.discountPrice ?? product?.discount?.value ? product?.discountPrice : null;
 
@@ -19,13 +22,36 @@ const ProductCard = ({ product }) => {
       to={`/products/${product?.id}`}
       className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
     >
-      <div className="relative h-48 w-full overflow-hidden bg-slate-100">
-        {primaryImage ? (
-          <img
-            src={primaryImage}
-            alt={product?.name}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-          />
+      <div className="relative aspect-square w-full overflow-hidden bg-slate-100">
+        {images.length > 0 ? (
+          hasMultipleImages ? (
+            <Swiper
+              modules={[Autoplay, Pagination]}
+              autoplay={{ delay: 3000, disableOnInteraction: false, pauseOnMouseEnter: true }}
+              pagination={{ clickable: true }}
+              loop
+              slidesPerView={1}
+              className="h-full w-full"
+            >
+              {images.map((image, index) => (
+                <SwiperSlide key={`${product?.id ?? 'product'}-${index}`} className="h-full w-full">
+                  <img
+                    src={image}
+                    alt={product?.name}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          ) : (
+            <img
+              src={images[0]}
+              alt={product?.name}
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              loading="lazy"
+            />
+          )
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-slate-400">No image</div>
         )}

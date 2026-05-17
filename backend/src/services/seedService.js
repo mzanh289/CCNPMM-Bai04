@@ -3,7 +3,6 @@ const path = require('path');
 const mongoose = require('mongoose');
 const Category = require('../models/Category');
 const Product = require('../models/Product');
-const ProductImage = require('../models/ProductImage');
 const Discount = require('../models/Discount');
 const Order = require('../models/Order');
 const OrderItem = require('../models/OrderItem');
@@ -52,7 +51,6 @@ const ensureSeedData = async () => {
 
   const categories = normalizeMongoExtended(readSeedFile('categories.json'));
   const products = normalizeMongoExtended(readSeedFile('products.json'));
-  const productImages = normalizeMongoExtended(readSeedFile('product_images.json'));
   const discounts = normalizeMongoExtended(readSeedFile('discounts.json'));
   const orders = normalizeMongoExtended(readSeedFile('orders.json'));
   const orderItems = normalizeMongoExtended(readSeedFile('order_items.json'));
@@ -63,9 +61,7 @@ const ensureSeedData = async () => {
   if (products.length) {
     await Product.insertMany(products);
   }
-  if (productImages.length) {
-    await ProductImage.insertMany(productImages);
-  }
+
   if (discounts.length) {
     await Discount.insertMany(discounts);
   }
